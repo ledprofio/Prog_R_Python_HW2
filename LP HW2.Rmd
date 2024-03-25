@@ -1,0 +1,66 @@
+---
+title: "LP Homework 2"
+author: "Luke Profio"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+## Question 1
+```{r question_1, include=TRUE, echo=FALSE, message=FALSE}
+library(nycflights13)
+library(tidyverse)
+
+flights_revised = left_join(flights, airlines) |>
+  select(-carrier, carrier=name, arr_delay, dep_delay)
+
+question_1 <- flights_revised |>
+  filter(month %in% c(7:11)) |>
+  group_by(carrier) |>
+  transmute(gain=arr_delay-dep_delay) |>
+  filter(!is.na(gain)) |>
+  summarize(average_gain=mean(gain)) |>
+  arrange(desc(average_gain))
+question_1
+```
+## Question 2
+```{r question_2, include=TRUE, echo=FALSE, message=FALSE}
+library(tidyverse)
+
+question_2 <- diamonds |>
+  filter(price %in% c(1000,2500) & cut %in% c("Good","Very Good","Premium")) |>
+  summarize(min_depth=min(depth),max_carat=max(carat))
+question_2
+```
+## Question 3
+```{r question_3, include=TRUE, echo=FALSE, message=FALSE}
+library(tidyverse)
+exams = read_csv("exams.csv")
+
+exams_tidy <- exams |> 
+  pivot_longer(cols = c("exam1","exam2","exam3"), names_to = "exam", values_to = "grade") |>
+  select(student, grade) |>
+  group_by(student) |>
+  summarize(mean_score=mean(grade))
+
+question_3 <- exams_tidy |>
+  mutate(pass = if_else(mean_score >= 60, "yes", "no")) |>
+  select(student,pass)
+question_3
+```
+## Question 4
+```{r question_4, include=TRUE, echo=FALSE, message=FALSE}
+library(tidyverse)
+transactions = read_csv("transactions.csv")
+
+transactions_tidy <- transactions |>
+  gather(purchase, sale, key = transaction_type, value = amount) |>
+  complete(month = 1:12, transaction_type, person) |>
+  arrange(month, person, transaction_type)
+
+question_4 <- transactions_tidy |>
+  filter(person %in% c("jenna","john"), !is.na(amount)) |>
+  distinct(month)
+question_4
+```
